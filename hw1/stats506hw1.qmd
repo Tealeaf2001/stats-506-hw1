@@ -1,0 +1,181 @@
+---
+title: "stats506hw1"
+author: "Qichang Wan"
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
+    embed-resources: true
+editor: visual
+---
+
+
+
+## Problem 1
+
+### (a)
+```{r}
+wine_data <- read.csv('wine/wine.data',header = F)
+
+colnames(wine_data) <- c("Class", "Alcohol", "Malic_Acid", "Ash", "Alcalinity of Ash", "Magnesium", "Total Phenols", "Flavanoids", "Nonflavanoid Phenols", "Proanthocyanins", "Color Intensity", "Hue", "OD280/OD315 of Diluted Wines", "Proline")
+```
+
+### (b)
+```{r}
+table(wine_data$Class)
+```
+The number of wines within each class is correct as reported in “wine.names”.
+
+### (c1)
+```{r}
+cor(wine_data$Alcohol, wine_data$`Color Intensity`)
+```
+correlation between alcohol content and color intensity is 0.5463642
+
+### (c2)
+```{r}
+# get correlation for each wine class
+split_data <- split(wine_data, wine_data$Class)
+correlations <- sapply(split_data, function(data) cor(data$Alcohol, data$`Color Intensity`))
+
+
+correlations
+```
+Class 1 has the highest correlation. Class 2 has the lowest correlation.
+
+### (c3)
+```{r}
+highest_color_intensity <- which.max(wine_data$`Color Intensity`)
+wine_data$Alcohol[highest_color_intensity ]
+```
+the alcohol content of the wine with the highest color intensity is 14.34
+
+### (c4)
+```{r}
+higher_proanthocyanins_percentage <- sum(wine_data$Proanthocyanins > wine_data$Ash)/ nrow(wine_data)
+higher_proanthocyanins_percentage
+```
+8.426966%
+
+### (d)
+```{r}
+overall_avg <- colMeans(wine_data[, -1])
+
+class_avg <- aggregate(wine_data[, -1], list(Class = wine_data$Class), mean)
+
+# Combine the results 
+average_table <- rbind(c("Overall", overall_avg), class_avg)
+average_table
+```
+
+### (e)
+```{r}
+t.test(wine_data$Ash[wine_data$Class==1],wine_data$Ash[wine_data$Class==2])
+```
+
+```{r}
+t.test(wine_data$Ash[wine_data$Class==1],wine_data$Ash[wine_data$Class==3])
+```
+
+```{r}
+t.test(wine_data$Ash[wine_data$Class==2],wine_data$Ash[wine_data$Class==3])
+```
+
+
+## Problem 2
+
+### (a)
+```{r}
+ask_manager_data <- read.csv("AskAManager.csv",header=TRUE)
+#head(ask_manager_data)
+```
+
+### (b)
+```{r}
+colnames(ask_manager_data) <-  c("x", "timestamp", "age range", "industry", "job title","job title additional context", "annual salary", "additional monetary compensation", "currency", "other currency", "income additional context", "country", "states", "city", "overall years of work experience", "in your field years of work experience", "education level", "gender", "race")
+colnames(ask_manager_data)
+```
+
+### (c)
+```{r}
+# Check the number of rows before restriction
+n_before <- nrow(ask_manager_data)
+
+# Restrict the data to only those paid in USD
+data_usd <- ask_manager_data[ask_manager_data$currency == "USD", ]
+
+# Check the number of rows after restriction
+n_after <- nrow(data_usd)
+
+
+cat("Number of observations before restriction: ", n_before, "\n")
+cat("Number of observations after restriction to USD: ", n_after, "\n")
+
+```
+
+
+## Problem 3
+
+### (a)
+```{r}
+isPalindromic <- function(num) {
+  
+  # Check if the input is a positive integer
+  if (!is.numeric(num) || num < 0 || floor(num) != num) {
+    stop("input error: Please enter a positive integer.")
+  }
+  
+  # Convert the number to a string and reverse it
+  num_str <- as.character(num)
+  reversed_num <- as.numeric(paste(rev(strsplit(num_str, NULL)[[1]]), collapse = ''))
+  
+  # Check if the number is palindromic
+  is_palindromic <- (num == reversed_num)
+  
+  # Return the result 
+  return(list(
+    isPalindromic = is_palindromic,
+    reversed = reversed_num
+  ))
+}
+
+# eg
+isPalindromic(728827)
+
+isPalindromic(39951)
+```
+### (b)
+```{r}
+nextPalindrome <- function(num) {
+  
+  # Check if the input is a positive integer
+  if (!is.numeric(num) || num < 0 || floor(num) != num) {
+    stop("Please enter a positive integer.")
+  }
+  
+  # checking numbers greater than the input
+  next_num <- num + 1
+  
+  while (!isPalindromic(next_num)$isPalindromic) {
+    next_num <- next_num + 1
+  }
+  
+  # Return the next palindromic number
+  return(next_num)
+}
+
+# eg
+nextPalindrome(7152)
+
+nextPalindrome(765431537)
+```
+
+### (c)
+```{r}
+c('391 next:',nextPalindrome(391))
+c('9928 next:',nextPalindrome(9928))
+c('19272719 next:',nextPalindrome(19272719))
+c('109 next:',nextPalindrome(109))
+c('2 next:',nextPalindrome(2))
+```
+
